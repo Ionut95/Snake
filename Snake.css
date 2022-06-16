@@ -1,0 +1,16 @@
+h5 {
+  text-align: center;
+  font-size: 35;
+  color: #daf7a6;
+}
+
+table {
+  background: #A7C7E7;
+  table-layout: fixed;
+  color: red;
+  width: 500px;
+}
+
+tr {
+  height: 25px;
+}
