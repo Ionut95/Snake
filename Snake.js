@@ -1,123 +1,209 @@
+let boxWeight = 340;
+let boxHeight = 300;
+let marginUp = 125;
+let marginLeft = 50;
+let sizeCell = 20;
+let canvas = document.getElementById("canvas");
+let context = canvas.getContext("2d");
 let gameEnd = false;
-let snakeBody = [134];
-let invalidMoves = [-1, 17, 35, 53, 71, 89, 107, 125, 143, 161, 179, 197, 215, 233, 251, 269];
-let snakeHead = 134;
-let intervalId;
 let pressedKey = 36;
-let food = 32;
+let intervalId;
 let points = 0;
-displayScore();
-document.getElementById("status").innerHTML = "Press an arrow from your keyboard to begin!";
-document.getElementById(food).style.backgroundColor = "#FF3131";
-document.getElementById(snakeBody[0]).style.backgroundColor = "#888888";
+let snakeHead = [210.5, 265.5];
+let bodyHorizontal = [210.5];
+let bodyVertical = [265.5];
+let food = [110.5, 365.5];
+let validKeys = [37, 38, 39, 40];
+let button = document.getElementById("canvas");
+let btnWidth = 75;
+let btnHeight = 22;
+let btnLeft = button.offsetLeft;
+let btnTop = button.offsetTop;
+let btnMarginup = 95;
+let btnMarginLeft = 190;
+let texts = ["Press an arrow to start the game!", "Let's get as many points as posible!", "Game over!"];
+let indexTexts = 0;
+
+title();
+drawBoard();
+colorCell();
+placeFood();
+displayPoints();
+drawMessage();
+
+function title() {
+  context.font ="25px Comic Sans MS";
+  context.fillStyle = "red";
+  context.textAlign = "center";
+  context.fillText("Snake game!", 222, 45);
+}
+
+function drawMessage() {
+  removeElements(100, 67, 250, 20);
+  context.font = "15px Comic Sans MS";
+  context.fillStyle = "black";
+  context.textAlign = "center";
+  context.fillText(texts[indexTexts], 225, 80);
+}
+
+function drawBoard() {
+  for (let x = 0; x <= boxWeight; x += 20) {
+    context.moveTo(0.5 + x + marginLeft, marginUp);
+    context.lineTo(0.5 + x + marginLeft, boxHeight + marginUp);
+  }
+
+  for (let x = 0; x <= boxHeight; x += 20) {
+    context.moveTo(marginLeft, 0.5 + x + marginUp);
+    context.lineTo(boxWeight + marginLeft, 0.5 + x + marginUp);
+  }
+  context.strokeStyle = "black";
+  context.stroke();
+}
+
+function drawButton() {
+  context.rect(btnMarginLeft, btnMarginup, btnWidth, btnHeight);
+  context.stroke();
+  context.font = "17px Comic Sans MS";
+  context.fillStyle = "blue";
+  context.textAlign = "center";
+  context.fillText("Restart!", 228, 112);
+  button.addEventListener("click", function(event) {
+    callEvent(event);
+  });
+}
+
+function callEvent(e) {
+  let x = e.pageX - btnLeft;
+  let y = e.pageY - btnTop;
+  if (x > btnMarginLeft && x < btnMarginLeft + btnWidth && y >= btnMarginup && y < btnMarginup + btnHeight) {
+    location.reload();
+  }
+}
+
+function colorCell() {
+  context.fillStyle = "red";
+  context.fillRect(snakeHead[0] + 0.5, snakeHead[1] + 0.5, sizeCell - 1, sizeCell - 1);
+}
+
+function removeElements(x, y, width, height) {
+  context.clearRect(x, y, width, height);
+}
 
 document.onkeydown = function(e) {
-  document.getElementById("status").innerHTML = "Let's get as many points as posible!";
-  if (e.keyCode == "37" && pressedKey != 39 && pressedKey != e.keyCode && gameEnd == false) {
+  if (gameEnd == false && pressedKey != e.keyCode && validKeys.includes(e.keyCode) == true && checkOpposite(e.keyCode) != pressedKey) {
     clearInterval(intervalId);
-    intervalId = setInterval(moveLeft, 500);
-  } else if (e.keyCode == "38" && pressedKey != 40 && pressedKey != e.keyCode && gameEnd == false) {
-    clearInterval(intervalId);
-    intervalId = setInterval(moveUp, 500);
-  } else if (e.keyCode == "39" && pressedKey != 37 && pressedKey != e.keyCode && gameEnd == false) {
-    clearInterval(intervalId);
-    intervalId = setInterval(moveRight, 500);
-  } else if (e.keyCode == "40" && pressedKey != 38 && pressedKey != e.keyCode && gameEnd == false) {
-    clearInterval(intervalId);
-    intervalId = setInterval(moveDown, 500);
-  }
-};
-
-function moveLeft() {
-  pressedKey = 37;
-  --snakeHead;
-  if (checkMove() == 1) {
-    moveSnake();
-  } else {
-    end();
+    pressKey(e);
   }
 }
 
-function moveRight() {
-  pressedKey = 39;
-  ++snakeHead;
-  if (checkMove() == 1) {
-    moveSnake();
-  } else {
-    end();
+function checkOpposite(key) {
+  if (key == 37 || key == 38) {
+    return key + 2;
+  }
+  return key - 2;
+}
+
+function pressKey(e) {
+  indexTexts = 1;
+  drawMessage();
+  if (e.keyCode == "37") {
+    intervalId = setInterval(left, 500);
+  } else if (e.keyCode == "38") {
+    intervalId = setInterval(up, 500);
+  } else if (e.keyCode == "39") {
+    intervalId = setInterval(right, 500);
+  } else if (e.keyCode = "40") {
+    intervalId = setInterval(down, 500);
   }
 }
 
-function moveUp() {
+function up() {
   pressedKey = 38;
-  snakeHead -= 18;
-  if (checkMove() == 1) {
-    moveSnake();
-  } else {
-    end();
-  }
+  snakeHead[1] -= sizeCell;
+  checkMove();
 }
 
-function moveDown() {
+function down() {
   pressedKey = 40;
-  snakeHead += 18;
-  if (checkMove() == 1) {
-    moveSnake();
-  } else {
+  snakeHead[1] += sizeCell;
+  checkMove();
+}
+
+function right() {
+  pressedKey = 39;
+  snakeHead[0] += sizeCell;
+  checkMove();
+
+}
+
+function left() {
+  pressedKey = 37;
+  snakeHead[0] -= sizeCell;
+  checkMove();
+}
+
+function generateFood() {
+  do {
+    food[0] = 50.5 + Math.floor(Math.random() * 16) * 20;
+    food[1] = 125.5 + Math.floor(Math.random() * 14) * 20;
+  } while (bodyHorizontal.includes(food[0]) == true && bodyVertical.includes(food[1]) == true);
+  placeFood();
+}
+
+function placeFood() {
+  context.fillStyle = "yellow";
+  context.fillRect(food[0] + 0.5, food[1] + 0.5, sizeCell - 1, sizeCell - 1);
+}
+
+function checkMove() {
+  if (snakeHead[0] < marginLeft || snakeHead[0] > marginLeft + boxWeight || snakeHead[1] < marginUp 
+    || snakeHead[1] > marginUp + boxHeight || checkBody() == 0) {
     end();
+  } else {
+    moveSnake();
   }
 }
 
-function end() {
-  gameEnd = true;
-  clearInterval(intervalId);
-  document.getElementById("status").innerHTML = "Game over!";
-  document.getElementById("status").style.color = "#daf7a6";
-  restartGame();
-} 
-
-function feedSnake() {
-  food = Math.floor(Math.random() * 268);
-  while (snakeBody.includes(food) == true || invalidMoves.includes(food) == true) {
-    food = Math.floor(Math.random() * 268);
+function checkBody() {
+  for (let index = 0; index < bodyHorizontal.length; ++index) {
+    if (bodyHorizontal[index] == snakeHead[0] && bodyVertical[index] == snakeHead[1]) {
+      return 0;
+    }
   }
-  document.getElementById(food).style.backgroundColor = "#FF3131";
+  return 1;
 }
 
 function moveSnake() {
-  snakeBody.unshift(snakeHead);
-  document.getElementById(snakeHead).style.backgroundColor = "#888888";
-  if (snakeHead == food) {
+  bodyHorizontal.unshift(snakeHead[0]);
+  bodyVertical.unshift(snakeHead[1]);
+  colorCell();
+  if (snakeHead[0] == food[0] && snakeHead[1] == food[1]) {
     ++points;
-    displayScore();
-    feedSnake();
+    displayPoints()
+    generateFood();
   } else {
     removeQueue();
   }
 }
 
-
 function removeQueue() {
-  document.getElementById(snakeBody[snakeBody.length - 1]).style.backgroundColor = "#A7C7E7";
-  snakeBody.pop();
+  removeElements(bodyHorizontal[bodyHorizontal.length - 1] + 0.5, bodyVertical[bodyVertical.length - 1] + 0.5, sizeCell - 1, sizeCell - 1);
+  bodyVertical.pop();
+  bodyHorizontal.pop();
 }
 
-function checkMove() {
-  if (snakeBody.includes(snakeHead) == true || invalidMoves.includes(snakeHead) == true || snakeHead < 0 || snakeHead > 268) {
-    return 0;
-  }
-  return 1;
+function end() {
+  indexTexts = 2;
+  drawMessage();
+  gameEnd = true;
+  clearInterval(intervalId);
+  drawButton();
 }
 
-function displayScore() {
-  document.getElementById("score").innerHTML = "Points: " + points + "!";
-}
-
-function restartGame() {
-  let button = document.createElement("button");
-  button.innerText = "Restart";
-  button.addEventListener("click", function() {
-    location.reload();
-  });
-  document.body-restart.appendChild(button);
+function displayPoints() {
+  removeElements(150, 440, 120, 20);
+  context.font = "17px Comic Sans MS";
+  context.fillStyle = "black";
+  context.textAlign = "center";
+  context.fillText("Points: " + points + "!", 220, 455);
 }
