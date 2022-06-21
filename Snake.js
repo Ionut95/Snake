@@ -22,14 +22,13 @@ let btnTop = button.offsetTop;
 let btnMarginup = 95;
 let btnMarginLeft = 190;
 let texts = ["Press an arrow to start the game!", "Let's get as many points as posible!", "Game over!"];
-let indexTexts = 0;
 
 title();
 drawBoard();
 colorCell();
 placeFood();
 displayPoints();
-drawMessage();
+drawMessage(0);
 
 function title() {
   context.font ="25px Comic Sans MS";
@@ -38,7 +37,7 @@ function title() {
   context.fillText("Snake game!", 222, 45);
 }
 
-function drawMessage() {
+function drawMessage(indexTexts) {
   removeElements(100, 67, 250, 20);
   context.font = "15px Comic Sans MS";
   context.fillStyle = "black";
@@ -104,8 +103,7 @@ function checkOpposite(key) {
 }
 
 function pressKey(e) {
-  indexTexts = 1;
-  drawMessage();
+  drawMessage(1);
   if (e.keyCode == "37") {
     intervalId = setInterval(left, 500);
   } else if (e.keyCode == "38") {
@@ -193,8 +191,7 @@ function removeQueue() {
 }
 
 function end() {
-  indexTexts = 2;
-  drawMessage();
+  drawMessage(2);
   gameEnd = true;
   clearInterval(intervalId);
   drawButton();
